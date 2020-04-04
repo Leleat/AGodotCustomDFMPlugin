@@ -27,6 +27,11 @@ func _on_DFM_BUTTON_pressed() -> void:
 	_show_docks()
 
 
+func _on_main_screen_changed(new_screen : String) -> void:
+	yield(get_tree(), "idle_frame")
+	_show_docks()
+
+
 func _show_docks(tab : int = -1) -> void: # called via via DFM button pressed and dock tab changed
 	if DFM_BUTTON.pressed:
 		var vis_tabcontainer : Array
