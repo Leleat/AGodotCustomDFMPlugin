@@ -3,7 +3,9 @@ extends MenuButton
 
 
 var BASE_CONTROL_VBOX : VBoxContainer
+var INTERFACE : EditorInterface
 var DFM_BUTTON : ToolButton
+var initial_screen_changed_to_script : bool = true
 
 
 func _ready() -> void:
@@ -29,6 +31,13 @@ func _on_DFM_BUTTON_pressed() -> void:
 
 func _on_main_screen_changed(new_screen : String) -> void:
 	yield(get_tree(), "idle_frame")
+	if initial_screen_changed_to_script:
+		if get_popup().is_item_checked(1):
+			if new_screen == "Script":
+				DFM_BUTTON.emit_signal("pressed")
+				initial_screen_changed_to_script = false
+		else:
+			initial_screen_changed_to_script = false
 	_show_docks()
 
 
@@ -97,6 +106,7 @@ func load_settings() -> void:
 	get_popup().clear()
 	get_popup().rect_size = Vector2(1, 1)
 	get_popup().add_check_item("Use DFM on editor start")
+	get_popup().add_check_item("Use DFM in \"Script\" screen on editor start")
 	get_popup().add_separator("  Options  ")
 	
 	for tabcontainer in BASE_CONTROL_VBOX.get_child(1).get_child(0).get_children(): # LEFT left

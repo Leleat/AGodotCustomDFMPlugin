@@ -1,6 +1,6 @@
 # Custom Distraction Free Mode
 
-Choose what docks to keep visible in distraction free mode (DFM). Optionally enable DFM on editor start. You may want to enable "Separate Distraction Mode" in the EditorSettings/Editor/Separate Distraction Mode.
+Choose what docks to keep visible in distraction free mode (DFM). Optionally enable DFM on editor start.
 
 **Installation**:
 
