@@ -11,6 +11,7 @@ var initial_screen_changed_to_script : bool = true
 func _ready() -> void:
 	get_popup().connect("index_pressed", self, "_on_PopupMenu_index_pressed")
 	get_popup().connect("hide", self, "_on_PopupMenu_hide")
+	get_popup().hide_on_checkable_item_selection = false
 
 
 func _on_PopupMenu_index_pressed(index : int) -> void:
