@@ -7,7 +7,6 @@ var custom_dfm_button : MenuButton = load("res://addons/CustomDFM/MenuButton.tsc
 
 func _enter_tree():
 	add_control_to_container(EditorPlugin.CONTAINER_TOOLBAR, custom_dfm_button)
-	custom_dfm_button.get_parent().move_child(custom_dfm_button, 4)
 	var BASE_CONTROL_VBOX = get_editor_interface().get_base_control().get_child(1)
 	var DFM_BUTTON = get_editor_interface().get_base_control().get_child(1).get_child(1).get_child(1).get_child(1).get_child(0).get_child(0).get_child(0).get_child(0)\
 			.get_child(0).get_child(get_editor_interface().get_base_control().get_child(1).get_child(1).get_child(1).get_child(1).\

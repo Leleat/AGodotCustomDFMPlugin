@@ -6,20 +6,25 @@ var BASE_CONTROL_VBOX : VBoxContainer
 var INTERFACE : EditorInterface
 var DFM_BUTTON : ToolButton
 var initial_screen_changed_to_script : bool = true
+var settings_updated : bool = false
 
 
 func _ready() -> void:
 	get_popup().connect("index_pressed", self, "_on_PopupMenu_index_pressed")
 	get_popup().connect("hide", self, "_on_PopupMenu_hide")
 	get_popup().hide_on_checkable_item_selection = false
+	icon = get_icon("Collapse", "EditorIcons")
 
 
 func _on_PopupMenu_index_pressed(index : int) -> void:
 	get_popup().set_item_checked(index, not get_popup().is_item_checked(index))
+	settings_updated = true
 
 
 func _on_PopupMenu_hide() -> void:
-	_save_setting()
+	if settings_updated:
+		_save_setting()
+		settings_updated = false
 
 
 func _on_MenuButton_pressed() -> void:
@@ -46,17 +51,16 @@ func _show_docks(tab : int = -1) -> void: # called via via DFM button pressed an
 	if DFM_BUTTON.pressed:
 		var vis_tabcontainer : Array
 		# show tabs
-		for index in get_popup().get_item_count() - 1: # - 1 because bottom panel is last
-			var dock = _get_dock(get_popup().get_item_text(index))
-			if dock:
-				if get_popup().is_item_checked(index):
-					dock.get_parent().show()
-					dock.get_parent().get_parent().show()
-					dock.get_parent().get_parent().get_parent().show()
-					if not dock.get_parent() in vis_tabcontainer:
-						vis_tabcontainer.push_back(dock.get_parent())
-				else:
-					dock.get_parent().set_tab_disabled(dock.get_index(), true)
+		for index in get_popup().get_item_count() - 4: # - 4 and index + 3 because non-dock items are in the list
+			var dock = _get_dock(get_popup().get_item_text(index + 3))
+			if get_popup().is_item_checked(index + 3):
+				dock.get_parent().show()
+				dock.get_parent().get_parent().show()
+				dock.get_parent().get_parent().get_parent().show()
+				if not dock.get_parent() in vis_tabcontainer:
+					vis_tabcontainer.push_back(dock.get_parent())
+			else:
+				dock.get_parent().set_tab_disabled(dock.get_index(), true)
 		# change tab to active one
 		for tabcontainer in vis_tabcontainer:
 			if tabcontainer.get_tab_disabled(tabcontainer.current_tab):
@@ -69,10 +73,9 @@ func _show_docks(tab : int = -1) -> void: # called via via DFM button pressed an
 			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(0).get_child(0).get_child(1).show()
 	
 	else:
-		for index in get_popup().get_item_count() - 1: # - 1 because bottom panel is last
-			var dock = _get_dock(get_popup().get_item_text(index))
-			if dock:
-				dock.get_parent().set_tab_disabled(dock.get_index(), false)
+		for index in get_popup().get_item_count() - 4: # - 4 and index + 3 because non-dock items are in the list
+			var dock = _get_dock(get_popup().get_item_text(index + 3))
+			dock.get_parent().set_tab_disabled(dock.get_index(), false)
 
 
 func _get_dock(dclass : String) -> Node: # dclass : "FileSystemDock" || "ImportDock" || "NodeDock" || "SceneTreeDock" || "InspectorDock" are defaults
@@ -113,15 +116,12 @@ func load_settings() -> void:
 	for tabcontainer in BASE_CONTROL_VBOX.get_child(1).get_child(0).get_children(): # LEFT left
 		for dock in tabcontainer.get_children():
 			get_popup().add_check_item(dock.get_class() if dock.get_class().findn("Dock") != -1 else dock.name)
-	
 	for tabcontainer in BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(0).get_children(): # LEFT right
 		for dock in tabcontainer.get_children():
 			get_popup().add_check_item(dock.get_class() if dock.get_class().findn("Dock") != -1 else dock.name)
-	
 	for tabcontainer in BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(0).get_children(): # RIGHT left
 		for dock in tabcontainer.get_children():
 			get_popup().add_check_item(dock.get_class() if dock.get_class().findn("Dock") != -1 else dock.name)
-	
 	for tabcontainer in BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(1).get_children(): # RIGHT right
 		for dock in tabcontainer.get_children():
 			get_popup().add_check_item(dock.get_class() if dock.get_class().findn("Dock") != -1 else dock.name)
