@@ -37,6 +37,9 @@ func _on_PopupMenu_index_pressed(index : int) -> void:
 func _on_PopupMenu_hide() -> void:
 	if settings_updated:
 		save_settings()
+		DFM_BUTTON.emit_signal("pressed")
+		yield(get_tree(), "idle_frame")
+		DFM_BUTTON.emit_signal("pressed")
 		settings_updated = false
 
 

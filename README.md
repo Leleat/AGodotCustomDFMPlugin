@@ -1,6 +1,6 @@
-# Custom Distraction Free Mode
+# Custom Distraction Free Mode (Workspace Profiles "light")
 
-Choose what docks to keep visible in distraction free mode (DFM). Optionally enable DFM on editor start.
+Choose what docks to keep visible in distraction free mode (DFM). DFM is separated into 2D/3D and Script viewport so you can use 2 distinct profiles. Optionally enable DFM on editor start.
 
 **Installation**:
 
