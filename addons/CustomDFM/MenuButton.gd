@@ -138,7 +138,7 @@ func update_dock_visibility(tab : int = -1) -> void: # called via signals on DFM
 		var idx = get_popup().get_item_count() - 1 if current_main_screen == "Script" else 3 + dock_count - 1
 		if get_popup().is_item_checked(idx):
 			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(0).get_child(0).get_child(1).show()
-	
+
 	else:
 		# for node selection via SceneTreeDock
 		for index in dock_count - 1: 
