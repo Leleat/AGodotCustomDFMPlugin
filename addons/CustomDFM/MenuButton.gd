@@ -14,9 +14,6 @@ var DFM_BUTTON : ToolButton
 var settings_updated : bool = false
 var dock_count : int = 0 # includes bottom panel
 var current_main_screen : String
-var rhsplit_visible : bool
-var leftleft_visible : bool
-var leftright_visible : bool
 var first_change_to_script_view : bool = true
 var dfm_enabled_on_scene : bool = false
 var dfm_enabled_on_script : bool = false
@@ -78,7 +75,7 @@ func _on_main_screen_changed(new_screen : String) -> void:
 	if dfm_enabled_on_script and not DFM_BUTTON.pressed and current_main_screen == "Script": # for script opening via SceneTreeDock
 		DFM_BUTTON.pressed = true
 	
-	yield(get_tree(), "idle_frame")
+	yield(get_tree(), "idle_frame") 
 	update_dock_visibility()
 
 
@@ -89,9 +86,11 @@ func update_dock_visibility(tab : int = -1) -> void: # called via signals on DFM
 	
 	if DFM_BUTTON.pressed:
 		var visible_tabcontainer : Array
-		rhsplit_visible = false
-		leftleft_visible = false
-		leftright_visible = false
+		var rhsplit_visible = false
+		var rightleft_visible = false 
+		var rightright_visible = false
+		var leftleft_visible = false
+		var leftright_visible = false
 		
 		# show tabs
 		for index in dock_count - 1: 
@@ -99,7 +98,11 @@ func update_dock_visibility(tab : int = -1) -> void: # called via signals on DFM
 			var dock = get_dock(get_popup().get_item_text(idx))
 			if get_popup().is_item_checked(idx):
 				
-				if dock[1].begins_with("Right"):
+				if dock[1] == "Right left":
+					rightleft_visible = true
+					rhsplit_visible = true
+				elif dock[1] == "Right right":
+					rightright_visible = true
 					rhsplit_visible = true
 				elif dock[1] == "Left left":
 					leftleft_visible = true
@@ -117,10 +120,22 @@ func update_dock_visibility(tab : int = -1) -> void: # called via signals on DFM
 			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).show()
 		else:
 			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).hide()
+		
+		if rightleft_visible:
+			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(0).show()
+		else:
+			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(0).hide()
+		
+		if rightright_visible:
+			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(1).show()
+		else:
+			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(1).hide()
+		
 		if leftleft_visible:
 			BASE_CONTROL_VBOX.get_child(1).get_child(0).show()
 		else:
 			BASE_CONTROL_VBOX.get_child(1).get_child(0).hide()
+		
 		if leftright_visible:
 			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(0).show()
 		else:
@@ -138,7 +153,7 @@ func update_dock_visibility(tab : int = -1) -> void: # called via signals on DFM
 		var idx = get_popup().get_item_count() - 1 if current_main_screen == "Script" else 3 + dock_count - 1
 		if get_popup().is_item_checked(idx):
 			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(0).get_child(0).get_child(1).show()
-
+	
 	else:
 		# for node selection via SceneTreeDock
 		for index in dock_count - 1: 

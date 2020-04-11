@@ -2,3 +2,6 @@
 *.import
 project.godot
 zylann.editor_debugger/
+CommandPalettePopup/
+todo/
+todo.*
