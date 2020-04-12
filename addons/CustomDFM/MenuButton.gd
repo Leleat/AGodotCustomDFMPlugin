@@ -15,8 +15,10 @@ var settings_updated : bool = false
 var dock_count : int = 0 # includes bottom panel
 var current_main_screen : String
 var first_change_to_script_view : bool = true
-var dfm_enabled_on_scene : bool = false
-var dfm_enabled_on_script : bool = false
+var dfm_enabled_on_scene : bool
+var dfm_enabled_on_script : bool
+var docks : Dictionary # set via plugin.gd => {dock_position : [tabcontainer, visibility]}
+const UTIL = preload("res://addons/CustomDFM/util.gd")
 
 
 func _ready() -> void:
@@ -45,23 +47,17 @@ func _on_MenuButton_pressed() -> void:
 
 
 func _on_DFM_BUTTON_pressed() -> void:
-	match current_main_screen: # for node selection/script opening via SceneTreeDock
+	yield(get_tree(), "idle_frame") 
+	match current_main_screen: # setup for node selection/script opening via SceneTreeDock
 		"2D", "3D": 
-			if DFM_BUTTON.pressed:
-				dfm_enabled_on_scene = true
-			else:
-				dfm_enabled_on_scene = false
+			dfm_enabled_on_scene = true if DFM_BUTTON.pressed else false
 		"Script":
-			if DFM_BUTTON.pressed:
-				dfm_enabled_on_script = true
-			else:
-				dfm_enabled_on_script = false
+			dfm_enabled_on_script = true if DFM_BUTTON.pressed else false
 	
 	update_dock_visibility()
 
 
 func _on_main_screen_changed(new_screen : String) -> void:
-	current_main_screen = new_screen
 	if first_change_to_script_view and get_popup().get_item_count() > 2: # to autoswitch to DFM when switching to "Script" view the first time, if it is enabled
 		if get_popup().is_item_checked(1):
 			if new_screen == "Script":
@@ -70,117 +66,71 @@ func _on_main_screen_changed(new_screen : String) -> void:
 		else:
 			first_change_to_script_view = false
 	
+	current_main_screen = new_screen
+	
 	if not dfm_enabled_on_scene and DFM_BUTTON.pressed and current_main_screen in ["2D", "3D"]: # for node selection via SceneTreeDock
-		DFM_BUTTON.pressed = false
+		DFM_BUTTON.pressed = false # does not trigger signal
 	if dfm_enabled_on_script and not DFM_BUTTON.pressed and current_main_screen == "Script": # for script opening via SceneTreeDock
-		DFM_BUTTON.pressed = true
+		DFM_BUTTON.pressed = true # does not trigger signal
 	
 	yield(get_tree(), "idle_frame") 
 	update_dock_visibility()
 
 
 func update_dock_visibility(tab : int = -1) -> void: # called via signals on DFM button press or tab change of dock
-	for index in dock_count - 1:
-		var dock = get_dock(get_popup().get_item_text(index + 3))
-		dock[0].get_parent().set_tab_disabled(dock[0].get_index(), false)
-	
-	if DFM_BUTTON.pressed:
-		var visible_tabcontainer : Array
-		var rhsplit_visible = false
-		var rightleft_visible = false 
-		var rightright_visible = false
-		var leftleft_visible = false
-		var leftright_visible = false
+	if (current_main_screen in ["2D", "3D"] and dfm_enabled_on_scene) or (current_main_screen == "Script" and dfm_enabled_on_script):
+		# reset tabcontainer visibility property
+		for tabcontainer in docks:
+			docks[tabcontainer][1] = false
 		
-		# show tabs
+		# setup for visibility and disable dock
 		for index in dock_count - 1: 
 			var idx = 3 + index  if current_main_screen in ["2D", "3D"] else 3 + index + dock_count + 1
-			var dock = get_dock(get_popup().get_item_text(idx))
+			var dock = UTIL.get_dock(get_popup().get_item_text(idx), BASE_CONTROL_VBOX) # dock_slot_position set as meta via UTIL.get_dock()
 			if get_popup().is_item_checked(idx):
-				
-				if dock[1] == "Right left":
-					rightleft_visible = true
-					rhsplit_visible = true
-				elif dock[1] == "Right right":
-					rightright_visible = true
-					rhsplit_visible = true
-				elif dock[1] == "Left left":
-					leftleft_visible = true
-				elif dock[1] == "Left right":
-					leftright_visible = true
-				
-				dock[0].get_parent().show()
-				dock[0].get_parent().get_parent().show()
-				if not dock[0].get_parent() in visible_tabcontainer:
-					visible_tabcontainer.push_back(dock[0].get_parent())
+				docks[dock.get_meta("pos")][1] = true
+				dock.get_parent().set_tab_disabled(dock.get_index(), false)
 			else:
-				dock[0].get_parent().set_tab_disabled(dock[0].get_index(), true)
+				dock.get_parent().set_tab_disabled(dock.get_index(), true)
 		
-		if rhsplit_visible:
-			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).show()
+		# set tabcontainer visibility
+		for tabcontainer in docks:
+			if docks[tabcontainer][1] == true:
+				docks[tabcontainer][0].show()
+				# switch to first active tab
+				if docks[tabcontainer][0].get_tab_disabled(docks[tabcontainer][0].current_tab): 
+					for idx in docks[tabcontainer][0].get_tab_count():
+						if not docks[tabcontainer][0].get_tab_disabled(idx):
+							docks[tabcontainer][0].current_tab = idx
+							break
+			else:
+				docks[tabcontainer][0].hide()
+		
+		# set vsplit visibilities
+		for tabcontainer in docks.size() / 2:
+			if docks[tabcontainer * 2][1] == false and docks[tabcontainer * 2 + 1][1] == false:
+				docks[tabcontainer * 2][0].get_parent().hide()
+			else:
+				docks[tabcontainer * 2][0].get_parent().show()
+		
+		# set rhsplitcontainer visibility
+		if docks[EditorPlugin.DOCK_SLOT_RIGHT_UL][0].get_parent().visible == false and docks[EditorPlugin.DOCK_SLOT_RIGHT_UR][0].get_parent().visible == false:
+			docks[EditorPlugin.DOCK_SLOT_RIGHT_UL][0].get_parent().get_parent().hide()
 		else:
-			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).hide()
+			docks[EditorPlugin.DOCK_SLOT_RIGHT_UL][0].get_parent().get_parent().show()
 		
-		if rightleft_visible:
-			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(0).show()
-		else:
-			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(0).hide()
-		
-		if rightright_visible:
-			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(1).show()
-		else:
-			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(1).hide()
-		
-		if leftleft_visible:
-			BASE_CONTROL_VBOX.get_child(1).get_child(0).show()
-		else:
-			BASE_CONTROL_VBOX.get_child(1).get_child(0).hide()
-		
-		if leftright_visible:
-			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(0).show()
-		else:
-			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(0).hide()
-		
-		# change tab to active one
-		for tabcontainer in visible_tabcontainer:
-			if tabcontainer.get_tab_disabled(tabcontainer.current_tab):
-				for idx in tabcontainer.get_tab_count():
-					if not tabcontainer.get_tab_disabled(idx):
-						tabcontainer.current_tab = idx
-						break
-		
-		# bottom panel
+		# set bottom panel visibility
 		var idx = get_popup().get_item_count() - 1 if current_main_screen == "Script" else 3 + dock_count - 1
 		if get_popup().is_item_checked(idx):
 			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(0).get_child(0).get_child(1).show()
 	
 	else:
-		# for node selection via SceneTreeDock
-		for index in dock_count - 1: 
-			var dock = get_dock(get_popup().get_item_text(index + 3))
-			dock[0].get_parent().show()
-			dock[0].get_parent().get_parent().show()
-			dock[0].get_parent().get_parent().get_parent().show() 
-
-
-func get_dock(dclass : String): # dclass : "FileSystemDock" || "ImportDock" || "NodeDock" || "SceneTreeDock" || "InspectorDock" are defaults
-	for tabcontainer in BASE_CONTROL_VBOX.get_child(1).get_child(0).get_children(): # LEFT left
-		for dock in tabcontainer.get_children():
-			if dock.get_class() == dclass or dock.name == dclass:
-				return [dock, "Left left"]
-	for tabcontainer in BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(0).get_children(): # LEFT right
-		for dock in tabcontainer.get_children():
-			if dock.get_class() == dclass or dock.name == dclass:
-				return [dock, "Left right"]
-	for tabcontainer in BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(0).get_children(): # RIGHT left
-		for dock in tabcontainer.get_children():
-			if dock.get_class() == dclass or dock.name == dclass:
-				return [dock, "Right left"]
-	for tabcontainer in BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(1).get_children(): # RIGHT right
-		for dock in tabcontainer.get_children():
-			if dock.get_class() == dclass or dock.name == dclass:
-				return [dock, "Right right"]
-	return null
+		for index in dock_count - 1:
+			var dock = UTIL.get_dock(get_popup().get_item_text(index + 3), BASE_CONTROL_VBOX)
+			dock.get_parent().set_tab_disabled(dock.get_index(), false)
+			dock.get_parent().show()
+			dock.get_parent().get_parent().show()
+			dock.get_parent().get_parent().get_parent().show() 
 
 
 func save_settings() -> void:
@@ -205,16 +155,20 @@ func load_settings() -> void:
 	for tabcontainer in BASE_CONTROL_VBOX.get_child(1).get_child(0).get_children(): # LEFT left
 		for dock in tabcontainer.get_children():
 			get_popup().add_check_item(dock.get_class() if dock.get_class().findn("Dock") != -1 else dock.name)
+	
 	for tabcontainer in BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(0).get_children(): # LEFT right
 		for dock in tabcontainer.get_children():
 			get_popup().add_check_item(dock.get_class() if dock.get_class().findn("Dock") != -1 else dock.name)
+	
 	for tabcontainer in BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(0).get_children(): # RIGHT left
 		for dock in tabcontainer.get_children():
 			get_popup().add_check_item(dock.get_class() if dock.get_class().findn("Dock") != -1 else dock.name)
+	
 	for tabcontainer in BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(1).get_children(): # RIGHT right
 		for dock in tabcontainer.get_children():
 			get_popup().add_check_item(dock.get_class() if dock.get_class().findn("Dock") != -1 else dock.name)
-	get_popup().add_check_item("Bottom Panel") 
+	
+	get_popup().add_check_item("Bottom Panel")
 	
 	get_popup().add_separator("  Script Settings  ")
 	for index in get_popup().get_item_count() - 4: 

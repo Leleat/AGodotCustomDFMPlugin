@@ -34,6 +34,18 @@ func _enter_tree():
 
 
 func _ready() -> void:
+	var BASE_CONTROL_VBOX = get_editor_interface().get_base_control().get_child(1)
+	plugin_scene.docks = {
+		EditorPlugin.DOCK_SLOT_LEFT_UL : [BASE_CONTROL_VBOX.get_child(1).get_child(0).get_child(0), false],
+		EditorPlugin.DOCK_SLOT_LEFT_BL : [BASE_CONTROL_VBOX.get_child(1).get_child(0).get_child(1), false],
+		EditorPlugin.DOCK_SLOT_LEFT_UR : [BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(0).get_child(0), false],
+		EditorPlugin.DOCK_SLOT_LEFT_BR : [BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(0).get_child(1), false],
+		EditorPlugin.DOCK_SLOT_RIGHT_UL : [BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(0).get_child(0), false],
+		EditorPlugin.DOCK_SLOT_RIGHT_BL : [BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(0).get_child(1), false],
+		EditorPlugin.DOCK_SLOT_RIGHT_UR : [BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(1).get_child(0), false],
+		EditorPlugin.DOCK_SLOT_RIGHT_BR : [BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(1).get_child(1), false]
+		}
+	
 	yield(get_tree(), "idle_frame")
 	plugin_scene.load_settings()
 	yield(get_tree(), "idle_frame")
