@@ -6,25 +6,25 @@ static func get_dock(dclass : String, base_control_vbox : VBoxContainer) -> Node
 	for tabcontainer in base_control_vbox.get_child(1).get_child(0).get_children(): # LEFT left
 		for dock in tabcontainer.get_children():
 			if dock.get_class() == dclass or dock.name == dclass:
-				dock.set_meta("pos", EditorPlugin.DOCK_SLOT_LEFT_UL if tabcontainer.get_index() == 0 else EditorPlugin.DOCK_SLOT_LEFT_BL)
+				dock.set_meta("dock_slot", EditorPlugin.DOCK_SLOT_LEFT_UL if tabcontainer.get_index() == 0 else EditorPlugin.DOCK_SLOT_LEFT_BL)
 				return dock
 	
 	for tabcontainer in base_control_vbox.get_child(1).get_child(1).get_child(0).get_children(): # LEFT right
 		for dock in tabcontainer.get_children():
 			if dock.get_class() == dclass or dock.name == dclass:
-				dock.set_meta("pos", EditorPlugin.DOCK_SLOT_LEFT_UR if tabcontainer.get_index() == 0 else EditorPlugin.DOCK_SLOT_LEFT_BR)
+				dock.set_meta("dock_slot", EditorPlugin.DOCK_SLOT_LEFT_UR if tabcontainer.get_index() == 0 else EditorPlugin.DOCK_SLOT_LEFT_BR)
 				return dock
 	
 	for tabcontainer in base_control_vbox.get_child(1).get_child(1).get_child(1).get_child(1).get_child(0).get_children(): # RIGHT left
 		for dock in tabcontainer.get_children():
 			if dock.get_class() == dclass or dock.name == dclass:
-				dock.set_meta("pos", EditorPlugin.DOCK_SLOT_RIGHT_UL if tabcontainer.get_index() == 0 else EditorPlugin.DOCK_SLOT_RIGHT_BL)
+				dock.set_meta("dock_slot", EditorPlugin.DOCK_SLOT_RIGHT_UL if tabcontainer.get_index() == 0 else EditorPlugin.DOCK_SLOT_RIGHT_BL)
 				return dock
 	
 	for tabcontainer in base_control_vbox.get_child(1).get_child(1).get_child(1).get_child(1).get_child(1).get_children(): # RIGHT right
 		for dock in tabcontainer.get_children():
 			if dock.get_class() == dclass or dock.name == dclass:
-				dock.set_meta("pos", EditorPlugin.DOCK_SLOT_RIGHT_UR if tabcontainer.get_index() == 0 else EditorPlugin.DOCK_SLOT_RIGHT_BR)
+				dock.set_meta("dock_slot", EditorPlugin.DOCK_SLOT_RIGHT_UR if tabcontainer.get_index() == 0 else EditorPlugin.DOCK_SLOT_RIGHT_BR)
 				return dock
 	
 	push_warning("Plugin: %s dock not found." % dclass)
@@ -32,9 +32,5 @@ static func get_dock(dclass : String, base_control_vbox : VBoxContainer) -> Node
 
 
 static func get_current_script_texteditor(script_editor : ScriptEditor) -> TextEdit:
-	var script_index = 0
-	for script in script_editor.get_open_scripts():
-		if script == script_editor.get_current_script():
-			break
-		script_index += 1
+	var script_index = script_editor.get_child(0).get_child(1).get_child(1).get_current_tab_control().get_index() # be careful about help pages
 	return script_editor.get_child(0).get_child(1).get_child(1).get_child(script_index).get_child(0).get_child(0).get_child(0) as TextEdit 

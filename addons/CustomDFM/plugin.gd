@@ -36,14 +36,14 @@ func _enter_tree():
 func _ready() -> void:
 	var BASE_CONTROL_VBOX = get_editor_interface().get_base_control().get_child(1)
 	plugin_scene.docks = {
-		EditorPlugin.DOCK_SLOT_LEFT_UL : {"NODE" : BASE_CONTROL_VBOX.get_child(1).get_child(0).get_child(0), "VISIBLE" : false},
-		EditorPlugin.DOCK_SLOT_LEFT_BL : {"NODE" : BASE_CONTROL_VBOX.get_child(1).get_child(0).get_child(1), "VISIBLE" : false},
-		EditorPlugin.DOCK_SLOT_LEFT_UR : {"NODE" : BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(0).get_child(0), "VISIBLE" : false},
-		EditorPlugin.DOCK_SLOT_LEFT_BR : {"NODE" : BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(0).get_child(1), "VISIBLE" : false},
-		EditorPlugin.DOCK_SLOT_RIGHT_UL : {"NODE" : BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(0).get_child(0), "VISIBLE" : false},
-		EditorPlugin.DOCK_SLOT_RIGHT_BL : {"NODE" : BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(0).get_child(1), "VISIBLE" : false},
-		EditorPlugin.DOCK_SLOT_RIGHT_UR : {"NODE" : BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(1).get_child(0), "VISIBLE" : false},
-		EditorPlugin.DOCK_SLOT_RIGHT_BR : {"NODE" : BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(1).get_child(1), "VISIBLE" : false}
+		EditorPlugin.DOCK_SLOT_LEFT_UL : BASE_CONTROL_VBOX.get_child(1).get_child(0).get_child(0),
+		EditorPlugin.DOCK_SLOT_LEFT_BL : BASE_CONTROL_VBOX.get_child(1).get_child(0).get_child(1),
+		EditorPlugin.DOCK_SLOT_LEFT_UR : BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(0).get_child(0),
+		EditorPlugin.DOCK_SLOT_LEFT_BR : BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(0).get_child(1),
+		EditorPlugin.DOCK_SLOT_RIGHT_UL : BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(0).get_child(0),
+		EditorPlugin.DOCK_SLOT_RIGHT_BL : BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(0).get_child(1),
+		EditorPlugin.DOCK_SLOT_RIGHT_UR : BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(1).get_child(0),
+		EditorPlugin.DOCK_SLOT_RIGHT_BR : BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(1).get_child(1).get_child(1)
 		}
 	
 	yield(get_tree(), "idle_frame")

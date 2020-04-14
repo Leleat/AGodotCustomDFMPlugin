@@ -81,43 +81,43 @@ func update_dock_visibility(tab : int = -1) -> void: # called via signals on DFM
 	if (current_main_screen in ["2D", "3D"] and dfm_enabled_on_scene) or (current_main_screen == "Script" and dfm_enabled_on_script):
 		# reset custom tabcontainer visibility property
 		for tabcontainer in docks:
-			docks[tabcontainer].VISIBLE = false
+			docks[tabcontainer].set_meta("visible", false)
 		
 		# setup for visibility and disable dock
 		for index in dock_count - 1: 
 			var idx = 3 + index if current_main_screen in ["2D", "3D"] else 3 + index + dock_count + 1
 			var dock = UTIL.get_dock(get_popup().get_item_text(idx), BASE_CONTROL_VBOX) # dock_slot_position set as meta via UTIL.get_dock()
 			if get_popup().is_item_checked(idx):
-				docks[dock.get_meta("pos")].VISIBLE = true
+				docks[dock.get_meta("dock_slot")].set_meta("visible", true)
 				dock.get_parent().set_tab_disabled(dock.get_index(), false)
 			else:
 				dock.get_parent().set_tab_disabled(dock.get_index(), true)
 		
 		# set tabcontainer visibility
 		for tabcontainer in docks:
-			if docks[tabcontainer].VISIBLE:
-				docks[tabcontainer].NODE.show()
+			if docks[tabcontainer].get_meta("visible"):
+				docks[tabcontainer].show()
 				# switch to first active tab
-				if docks[tabcontainer].NODE.get_tab_disabled(docks[tabcontainer].NODE.current_tab): 
-					for idx in docks[tabcontainer].NODE.get_tab_count():
-						if not docks[tabcontainer].NODE.get_tab_disabled(idx):
-							docks[tabcontainer].NODE.current_tab = idx
+				if docks[tabcontainer].get_tab_disabled(docks[tabcontainer].current_tab): 
+					for idx in docks[tabcontainer].get_tab_count():
+						if not docks[tabcontainer].get_tab_disabled(idx):
+							docks[tabcontainer].current_tab = idx
 							break
 			else:
-				docks[tabcontainer].NODE.hide()
+				docks[tabcontainer].hide()
 		
 		# set vsplit visibilities => vsplit has 2 tabcontainers as children, so we check only every second tabcontainer
 		for tabcontainer in docks.size() / 2:
-			if not docks[tabcontainer * 2].VISIBLE and not docks[tabcontainer * 2 + 1].VISIBLE:
-				docks[tabcontainer * 2].NODE.get_parent().hide()
+			if not docks[tabcontainer * 2].get_meta("visible") and not docks[tabcontainer * 2 + 1].get_meta("visible"):
+				docks[tabcontainer * 2].get_parent().hide()
 			else:
-				docks[tabcontainer * 2].NODE.get_parent().show()
+				docks[tabcontainer * 2].get_parent().show()
 		
 		# set rhsplitcontainer visibility
-		if not docks[EditorPlugin.DOCK_SLOT_RIGHT_UL].NODE.get_parent().visible and not docks[EditorPlugin.DOCK_SLOT_RIGHT_UR].NODE.get_parent().visible:
-			docks[EditorPlugin.DOCK_SLOT_RIGHT_UL].NODE.get_parent().get_parent().hide()
+		if not docks[EditorPlugin.DOCK_SLOT_RIGHT_UL].get_parent().visible and not docks[EditorPlugin.DOCK_SLOT_RIGHT_UR].get_parent().visible:
+			docks[EditorPlugin.DOCK_SLOT_RIGHT_UL].get_parent().get_parent().hide()
 		else:
-			docks[EditorPlugin.DOCK_SLOT_RIGHT_UL].NODE.get_parent().get_parent().show()
+			docks[EditorPlugin.DOCK_SLOT_RIGHT_UL].get_parent().get_parent().show()
 		
 		# set bottom panel visibility
 		var idx = get_popup().get_item_count() - 1 if current_main_screen == "Script" else 3 + dock_count - 1
