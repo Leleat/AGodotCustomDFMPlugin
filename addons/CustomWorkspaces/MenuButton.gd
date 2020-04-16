@@ -21,7 +21,7 @@ var first_change_to_script_view : bool = true
 var dfm_enabled_on_scene : bool
 var dfm_enabled_on_script : bool
 var docks : Dictionary # set via plugin.gd => {dock_position : tabcontainer_node}
-const UTIL = preload("res://addons/CustomDFM/util.gd")
+const UTIL = preload("res://addons/CustomWorkspaces/util.gd")
 
 
 func _ready() -> void:

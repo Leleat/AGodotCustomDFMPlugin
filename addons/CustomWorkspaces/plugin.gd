@@ -2,7 +2,7 @@ tool
 extends EditorPlugin
 
 
-var plugin_scene : MenuButton = load("res://addons/CustomDFM/MenuButton.tscn").instance()
+var plugin_scene : MenuButton = load("res://addons/CustomWorkspaces/MenuButton.tscn").instance()
 var dfm_button = get_editor_interface().get_base_control().get_child(1).get_child(1).get_child(1).get_child(1).get_child(0).get_child(0).get_child(0).get_child(0)\
 			.get_child(0).get_child(get_editor_interface().get_base_control().get_child(1).get_child(1).get_child(1).get_child(1).\
 			get_child(0).get_child(0).get_child(0).get_child(0).get_child(0).get_child_count() - 1)
