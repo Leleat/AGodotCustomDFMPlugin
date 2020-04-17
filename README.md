@@ -1,4 +1,4 @@
-# Custom Workspace Profiles
+# Custom Distraction Free Mode Profiles
 
 **Features**:
 
