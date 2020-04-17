@@ -2,7 +2,7 @@ tool
 extends EditorPlugin
 
 
-var plugin_scene : MenuButton = load("res://addons/CustomWorkspaces/MenuButton.tscn").instance()
+var plugin_scene : MenuButton = load("res://addons/CustomDFM/MenuButton.tscn").instance()
 var dfm_button = get_editor_interface().get_base_control().get_child(1).get_child(1).get_child(1).get_child(1).get_child(0).get_child(0).get_child(0).get_child(0)\
 			.get_child(0).get_child(get_editor_interface().get_base_control().get_child(1).get_child(1).get_child(1).get_child(1).\
 			get_child(0).get_child(0).get_child(0).get_child(0).get_child(0).get_child_count() - 1)
@@ -48,23 +48,6 @@ func _ready() -> void:
 	
 	yield(get_tree(), "idle_frame")
 	plugin_scene.load_settings()
-	yield(get_tree(), "idle_frame")
-	
-	var editor_layout_popup : PopupMenu = BASE_CONTROL_VBOX.get_child(0).get_child(0).get_child(3).get_child(0).get_child(1)
-	plugin_scene.EDITOR_LAYOUT_POPUP = editor_layout_popup
-	if plugin_scene.get_popup().is_item_checked(0):
-		var config_exists = false
-		for idx in editor_layout_popup.get_item_count():
-			if editor_layout_popup.get_item_text(idx) == "CustomDFMScenes":
-				config_exists = true
-				break
-		if not config_exists:
-			editor_layout_popup.emit_signal("id_pressed", 60) # 60 = "Save Layout"
-			for child in get_editor_interface().get_base_control().get_children():
-				if child.get_class() == "EditorLayoutsDialog":
-					child.emit_signal("name_confirmed", "CustomWorkspaceScenes") # create editor layouts if they don't exist
-					child.emit_signal("name_confirmed", "CustomWorkspaceScripts") # create editor layouts if they don't exist
-					break
 
 
 func _exit_tree():

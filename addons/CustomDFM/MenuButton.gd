@@ -1,7 +1,7 @@
 """
-The first 4 items in the list are non-dock items (here docks are = all editor docks + bottom panel). Then come the docks for the 2D/3D viewport followed by a separator (non-dock item).
-After that, all docks will be listed again for the Script viewport. That means in total there are 4 non-dock items. So the PopupMenu's structure looks like size (top to bottom): 
-(4 x non-dock items) + (dock_count x dock items) + (non-dock separator) + (dock_count x dock items)
+The first 3 items in the list are non-dock items (here docks are = all editor docks + bottom panel). Then come the docks for the 2D/3D viewport followed by a separator (non-dock item).
+After that, all docks will be listed again for the Script viewport. That means in total there are 3 non-dock items. So the PopupMenu's structure looks like size (top to bottom): 
+(3 x non-dock items) + (dock_count x dock items) + (non-dock separator) + (dock_count x dock items)
 """
 
 tool
@@ -21,7 +21,7 @@ var first_change_to_script_view : bool = true
 var dfm_enabled_on_scene : bool
 var dfm_enabled_on_script : bool
 var docks : Dictionary # set via plugin.gd => {dock_position : tabcontainer_node}
-const UTIL = preload("res://addons/CustomWorkspaces/util.gd")
+const UTIL = preload("res://addons/CustomDFM/util.gd")
 
 
 func _ready() -> void:
@@ -62,24 +62,9 @@ func _on_main_screen_changed(new_screen : String) -> void:
 	current_main_screen = new_screen
 	yield(get_tree(), "idle_frame")
 	
-	# load editor layout
-	if get_popup().is_item_checked(0):
-		if new_screen in ["2D", "3D"]:
-			if EDITOR_LAYOUT_POPUP:
-				for idx in EDITOR_LAYOUT_POPUP.get_item_count():
-					if EDITOR_LAYOUT_POPUP.get_item_text(idx) == "CustomDFMScenes":
-						EDITOR_LAYOUT_POPUP.emit_signal("id_pressed", EDITOR_LAYOUT_POPUP.get_item_id(idx)) 
-						break
-		elif new_screen == "Script":
-			if EDITOR_LAYOUT_POPUP:
-				for idx in EDITOR_LAYOUT_POPUP.get_item_count():
-					if EDITOR_LAYOUT_POPUP.get_item_text(idx) == "CustomDFMScripts":
-						EDITOR_LAYOUT_POPUP.emit_signal("id_pressed", EDITOR_LAYOUT_POPUP.get_item_id(idx))
-						break
-	
 	# to autoswitch to DFM when switching to "Scene" view the first time, if it is enabled
 	if first_start and get_popup().get_item_count() > 2 :
-		if get_popup().is_item_checked(1):
+		if get_popup().is_item_checked(0):
 			if new_screen in ["2D", "3D"]:
 				DFM_BUTTON.emit_signal("pressed")
 				dfm_enabled_on_scene = true
@@ -89,7 +74,7 @@ func _on_main_screen_changed(new_screen : String) -> void:
 	
 	# to autoswitch to DFM when switching to "Script" view the first time, if it is enabled
 	if first_change_to_script_view and get_popup().get_item_count() > 2: 
-		if get_popup().is_item_checked(2):
+		if get_popup().is_item_checked(1):
 			if new_screen == "Script":
 				DFM_BUTTON.emit_signal("pressed")
 				dfm_enabled_on_script = true
@@ -118,7 +103,7 @@ func update_dock_visibility(tab : int = -1) -> void: # called via signals on DFM
 		
 		# setup for visibility and disable dock
 		for index in dock_count - 1: 
-			var idx = 4 + index if current_main_screen in ["2D", "3D"] else 4 + index + dock_count + 1
+			var idx = 3 + index if current_main_screen in ["2D", "3D"] else 3 + index + dock_count + 1
 			var dock = UTIL.get_dock(get_popup().get_item_text(idx), BASE_CONTROL_VBOX) # dock_slot_position set as meta via UTIL.get_dock()
 			if get_popup().is_item_checked(idx):
 				docks[dock.get_meta("dock_slot")].set_meta("visible", true)
@@ -153,7 +138,7 @@ func update_dock_visibility(tab : int = -1) -> void: # called via signals on DFM
 			docks[EditorPlugin.DOCK_SLOT_RIGHT_UL].get_parent().get_parent().show()
 		
 		# set bottom panel visibility
-		var idx = get_popup().get_item_count() - 1 if current_main_screen == "Script" else 4 + dock_count - 1
+		var idx = get_popup().get_item_count() - 1 if current_main_screen == "Script" else 3 + dock_count - 1
 		if get_popup().is_item_checked(idx):
 			BASE_CONTROL_VBOX.get_child(1).get_child(1).get_child(1).get_child(0).get_child(0).get_child(1).show()
 		else:
@@ -161,7 +146,7 @@ func update_dock_visibility(tab : int = -1) -> void: # called via signals on DFM
 	
 	else:
 		for index in dock_count - 1:
-			var dock = UTIL.get_dock(get_popup().get_item_text(index + 4), BASE_CONTROL_VBOX)
+			var dock = UTIL.get_dock(get_popup().get_item_text(index + 3), BASE_CONTROL_VBOX)
 			dock.get_parent().set_tab_disabled(dock.get_index(), false)
 			dock.get_parent().show()
 			dock.get_parent().get_parent().show()
@@ -172,19 +157,17 @@ func save_settings() -> void:
 	var config = ConfigFile.new()
 	config.set_value("Usage", get_popup().get_item_text(0).replace(" ", "_"), "true" if get_popup().is_item_checked(0) else "")
 	config.set_value("Usage", get_popup().get_item_text(1).replace(" ", "_"), "true" if get_popup().is_item_checked(1) else "")
-	config.set_value("Usage", get_popup().get_item_text(2).replace(" ", "_"), "true" if get_popup().is_item_checked(2) else "")
 	for index in dock_count: 
 		# scene editor
-		config.set_value("Scene_Editor", get_popup().get_item_text(4 + index).replace(" ", "_"), "true" if get_popup().is_item_checked(4 + index) else "")
+		config.set_value("Scene_Editor", get_popup().get_item_text(3 + index).replace(" ", "_"), "true" if get_popup().is_item_checked(3 + index) else "")
 		# script editor
-		config.set_value("Script_Editor", get_popup().get_item_text(4 + index + dock_count + 1).replace(" ", "_"), "true" if get_popup().is_item_checked(4 + index + dock_count + 1) else "")
+		config.set_value("Script_Editor", get_popup().get_item_text(3 + index + dock_count + 1).replace(" ", "_"), "true" if get_popup().is_item_checked(3 + index + dock_count + 1) else "")
 	config.save("user://custom_dfm_settings.cfg")
 
 
 func load_settings() -> void:
 	get_popup().clear()
 	get_popup().rect_size = Vector2(1, 1)
-	get_popup().add_check_item("Use separate viewport layouts (editor restart required).")
 	get_popup().add_check_item("Use DFM in scene viewport on editor start")
 	get_popup().add_check_item("Use DFM in script viewport on editor start")
 	get_popup().add_separator("  2D/3D Settings  ")
@@ -208,17 +191,16 @@ func load_settings() -> void:
 	get_popup().add_check_item("Bottom Panel")
 	
 	get_popup().add_separator("  Script Settings  ")
-	for index in get_popup().get_item_count() - 5: 
-		get_popup().add_check_item(get_popup().get_item_text(index + 4))
+	for index in get_popup().get_item_count() - 4: 
+		get_popup().add_check_item(get_popup().get_item_text(index + 3))
 	
-	dock_count = (get_popup().get_item_count() - 5) / 2
+	dock_count = (get_popup().get_item_count() - 4) / 2
 	
 	var config = ConfigFile.new()
 	var error = config.load("user://custom_dfm_settings.cfg")
 	if error == OK:
 		get_popup().set_item_checked(0, config.get_value("Usage", get_popup().get_item_text(0).replace(" ", "_"), false) as bool)
 		get_popup().set_item_checked(1, config.get_value("Usage", get_popup().get_item_text(1).replace(" ", "_"), false) as bool)
-		get_popup().set_item_checked(2, config.get_value("Usage", get_popup().get_item_text(2).replace(" ", "_"), false) as bool)
 		for index in dock_count:
-			get_popup().set_item_checked(4 + index, config.get_value("Scene_Editor", get_popup().get_item_text(index + 4).replace(" ", "_"), false) as bool)
-			get_popup().set_item_checked(4 + index + dock_count + 1, config.get_value("Script_Editor", get_popup().get_item_text(index + 4).replace(" ", "_"), false) as bool)
+			get_popup().set_item_checked(3 + index, config.get_value("Scene_Editor", get_popup().get_item_text(index + 3).replace(" ", "_"), false) as bool)
+			get_popup().set_item_checked(3 + index + dock_count + 1, config.get_value("Script_Editor", get_popup().get_item_text(index + 3).replace(" ", "_"), false) as bool)
