@@ -48,6 +48,10 @@ func _ready() -> void:
 	
 	yield(get_tree(), "idle_frame")
 	plugin_scene.load_settings()
+	if plugin_scene.get_popup().is_item_checked(0):
+		plugin_scene.first_start = true
+	if plugin_scene.get_popup().is_item_checked(1):
+		plugin_scene.first_change_to_script_view = true
 
 
 func _exit_tree():

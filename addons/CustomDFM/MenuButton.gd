@@ -16,8 +16,8 @@ var EDITOR_LAYOUT_POPUP : PopupMenu
 var settings_updated : bool = false
 var dock_count : int = 0 # includes bottom panel
 var current_main_screen : String
-var first_start : bool = true
-var first_change_to_script_view : bool = true
+var first_start : bool = false
+var first_change_to_script_view : bool = false
 var dfm_enabled_on_scene : bool
 var dfm_enabled_on_script : bool
 var docks : Dictionary # set via plugin.gd => {dock_position : tabcontainer_node}
@@ -62,25 +62,17 @@ func _on_main_screen_changed(new_screen : String) -> void:
 	current_main_screen = new_screen
 	yield(get_tree(), "idle_frame")
 	
-	# to autoswitch to DFM when switching to "Scene" view the first time, if it is enabled
-	if first_start and get_popup().get_item_count() > 2 :
-		if get_popup().is_item_checked(0):
-			if new_screen in ["2D", "3D"]:
-				DFM_BUTTON.emit_signal("pressed")
-				dfm_enabled_on_scene = true
-				first_start = false
-	else:
+	# to autoswitch to DFM when switching to "Scene" view the first time, if it is enabled. Set via plugin.gd.
+	if first_start and new_screen in ["2D", "3D"]:
+		DFM_BUTTON.emit_signal("pressed")
+		dfm_enabled_on_scene = true
 		first_start = false
 	
-	# to autoswitch to DFM when switching to "Script" view the first time, if it is enabled
-	if first_change_to_script_view and get_popup().get_item_count() > 2: 
-		if get_popup().is_item_checked(1):
-			if new_screen == "Script":
-				DFM_BUTTON.emit_signal("pressed")
-				dfm_enabled_on_script = true
-				first_change_to_script_view = false
-		else:
-			first_change_to_script_view = false
+	# to autoswitch to DFM when switching to "Script" view the first time, if it is enabled. Set via plugin.gd.
+	if first_change_to_script_view and new_screen == "Script":
+		DFM_BUTTON.emit_signal("pressed")
+		dfm_enabled_on_script = true
+		first_change_to_script_view = false
 	
 	# for node selection/script opening via SceneTreeDock
 	if not dfm_enabled_on_scene and DFM_BUTTON.pressed and current_main_screen in ["2D", "3D"]:
